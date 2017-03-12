@@ -37,17 +37,19 @@ class Supervisor(interface: String,
 
   def ready(listener: ActorRef): Receive = {
     case FromEditor(_, newValue) =>
-      listener ! MulticastManager.ReadyToSend(newValue)
+      listener ! ReadyToSend(newValue)
     case ListenedData(data, from) =>
       handleIncomingText(data)
       handleIncomingHost(Host(from.getAddress.getHostAddress))
   }
 
   def handleIncomingText(text: String): Unit = {
-    textArea.textProperty().removeListener(textListener)
-    textArea.setText(text)
-    textArea.positionCaret(text.length)
-    textArea.textProperty().addListener(textListener)
+    if (text != textArea.getText) {
+      textArea.textProperty().removeListener(textListener)
+      textArea.setText(text)
+      textArea.positionCaret(text.length)
+      textArea.textProperty().addListener(textListener)
+    }
   }
 
   def handleIncomingHost(h: Host): Unit = {
