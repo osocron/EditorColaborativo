@@ -46,17 +46,33 @@
       </VBox>
    </top>
    <right>
-      <JFXListView fx:id="listView" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <VBox BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </BorderPane.margin>
-      </JFXListView>
+         <children>
+            <Label text="Participantes">
+               <VBox.margin>
+                  <Insets bottom="5.0" />
+               </VBox.margin>
+            </Label>
+            <JFXListView fx:id="listView" prefWidth="200.0" />
+         </children>
+      </VBox>
    </right>
    <center>
-      <TextArea fx:id="textArea" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-         </padding>
-      </TextArea>
+      <VBox BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="15.0" left="15.0" top="15.0" />
+         </BorderPane.margin>
+         <children>
+            <Label text="Nombre del archivo">
+               <VBox.margin>
+                  <Insets bottom="5.0" />
+               </VBox.margin>
+            </Label>
+            <TextArea fx:id="textArea" VBox.vgrow="ALWAYS" />
+         </children>
+      </VBox>
    </center>
 </BorderPane>
