@@ -27,5 +27,6 @@ class Sender(remote: InetSocketAddress) extends Actor {
 }
 
 object Sender {
-  def props(remote: InetSocketAddress): Props = Props(classOf[Sender], remote)
+  def props(remote: InetSocketAddress): Props =
+    Props(classOf[Sender], remote).withDispatcher("akka.javafx-dispatcher")
 }

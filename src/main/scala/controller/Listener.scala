@@ -51,5 +51,6 @@ class Listener(nextActor: ActorRef, iface: String) extends Actor {
 
 object Listener {
   case class ListenedData(data: String, from: InetSocketAddress)
-  def props(next: ActorRef, interface: String): Props = Props(classOf[Listener], next, interface)
+  def props(next: ActorRef, interface: String): Props =
+    Props(classOf[Listener], next, interface).withDispatcher("akka.javafx-dispatcher")
 }
