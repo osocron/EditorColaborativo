@@ -38,7 +38,7 @@ class EditorController extends Initializable {
   def addTextProperty(supervisor: ActorRef) = {
     textArea.textProperty().addListener(new ChangeListener[String]() {
       override def changed(observable: ObservableValue[_ <: String], oldValue: String, newValue: String) = {
-        supervisor ! newValue
+        supervisor ! MulticastManager.FromEditor(oldValue, newValue)
       }
     })
   }

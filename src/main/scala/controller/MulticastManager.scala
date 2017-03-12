@@ -7,10 +7,10 @@ import java.nio.charset.Charset
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io.Inet.{DatagramChannelCreator, SocketOptionV2}
 import akka.io.{IO, Udp}
-import controller.Listener.ListenedData
+import controller.MulticastManager.{ListenedData, ReadyToSend}
 
 
-class Listener(nextActor: ActorRef, iface: String) extends Actor {
+class MulticastManager(supervisor: ActorRef, iface: String) extends Actor {
 
   final case class InetProtocolFamily() extends DatagramChannelCreator {
     override def create() =
@@ -42,15 +42,18 @@ class Listener(nextActor: ActorRef, iface: String) extends Actor {
     case Udp.Received(data, remote) =>
       println(s"Recieved data from ${remote.getAddress}")
       val processed = data.decodeString(Charset.defaultCharset())
-      nextActor ! ListenedData(processed, remote)
+      supervisor ! ListenedData(processed, remote)
     case Udp.Unbind  => socket ! Udp.Unbind
     case Udp.Unbound => context.stop(self)
+    case ReadyToSend(data) => socket ! data
   }
 
 }
 
-object Listener {
+object MulticastManager {
   case class ListenedData(data: String, from: InetSocketAddress)
+  case class FromEditor(oldValue: String, newValue: String)
+  case class ReadyToSend(data: String)
   def props(next: ActorRef, interface: String): Props =
-    Props(classOf[Listener], next, interface).withDispatcher("akka.javafx-dispatcher")
+    Props(classOf[MulticastManager], next, interface).withDispatcher("akka.javafx-dispatcher")
 }
