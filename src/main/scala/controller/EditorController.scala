@@ -21,7 +21,6 @@ class EditorController extends Initializable {
   override def initialize(location: URL, resources: ResourceBundle): Unit = {
     println("Controller Intizialized")
     val supervisor = createActorSystem()
-    addTextProperty(supervisor)
   }
 
 
@@ -33,14 +32,6 @@ class EditorController extends Initializable {
         listView,
         FXCollections.observableArrayList[Host]())).withDispatcher("akka.javafx-dispatcher"),
       name = "Supervisor")
-  }
-
-  def addTextProperty(supervisor: ActorRef) = {
-    textArea.textProperty().addListener(new ChangeListener[String]() {
-      override def changed(observable: ObservableValue[_ <: String], oldValue: String, newValue: String) = {
-        supervisor ! MulticastManager.FromEditor(oldValue, newValue)
-      }
-    })
   }
 
 

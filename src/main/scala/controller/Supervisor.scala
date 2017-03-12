@@ -1,5 +1,6 @@
 package controller
 
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.scene.control.TextArea
 
@@ -11,9 +12,12 @@ import scala.collection.mutable
 /**
   * Created by osocron on 11/03/17.
   */
-class Supervisor(interface: String, textArea: TextArea,
+class Supervisor(interface: String,
+                 textArea: TextArea,
                  listView: JFXListView[Host],
                  hosts: ObservableList[Host]) extends Actor {
+
+  import MulticastManager._
 
   case class ManagerReady(a: ActorRef)
 
@@ -21,6 +25,7 @@ class Supervisor(interface: String, textArea: TextArea,
     println("Warming up Akka...")
     val managerProps = MulticastManager.props(self, interface)
     val manager: ActorRef = context.actorOf(managerProps)
+    textArea.textProperty().addListener(textListener)
     self ! ManagerReady(manager)
   }
 
@@ -31,16 +36,18 @@ class Supervisor(interface: String, textArea: TextArea,
   }
 
   def ready(listener: ActorRef): Receive = {
-    case MulticastManager.FromEditor(_, newValue) =>
+    case FromEditor(_, newValue) =>
       listener ! MulticastManager.ReadyToSend(newValue)
-    case MulticastManager.ListenedData(data, from) =>
+    case ListenedData(data, from) =>
       handleIncomingText(data)
       handleIncomingHost(Host(from.getAddress.getHostAddress))
   }
 
   def handleIncomingText(text: String): Unit = {
+    textArea.textProperty().removeListener(textListener)
     textArea.setText(text)
     textArea.positionCaret(text.length)
+    textArea.textProperty().addListener(textListener)
   }
 
   def handleIncomingHost(h: Host): Unit = {
@@ -49,6 +56,12 @@ class Supervisor(interface: String, textArea: TextArea,
     while (iterator.hasNext) hostNameArray += iterator.next().address
     if (!hostNameArray.contains(h.address)) hosts.add(h)
     listView.setItems(hosts)
+  }
+
+  val textListener = new ChangeListener[String]() {
+    override def changed(observable: ObservableValue[_ <: String], oldValue: String, newValue: String) = {
+      self ! MulticastManager.FromEditor(oldValue, newValue)
+    }
   }
 
 }
