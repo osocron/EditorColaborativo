@@ -27,30 +27,12 @@ class EditorController extends Initializable {
     chooseInterfaceAndStartSystem()
   }
 
-
-  def createActorSystem(iface: String): ActorRef = {
-    val system = ActorSystem("EditorSystem")
-    system.actorOf(Props(
-      new Supervisor(iface,
-        textArea,
-        listView,
-        FXCollections.observableArrayList[Host]())).withDispatcher("akka.javafx-dispatcher"),
-      name = "Supervisor")
-  }
-
-  def chooseInterfaceDialog(): Option[String] = {
-    val enum = NetworkInterface.getNetworkInterfaces
-    val choices = new util.ArrayList[String]()
-    while (enum.hasMoreElements) choices.add(enum.nextElement().getName)
-    val dialog = new ChoiceDialog[String]("Seleccione una opcion", choices)
-    dialog.setTitle("Seleccion de Interfaces")
-    dialog.setHeaderText("Favor de seleccionar la interfaz conectada a internet.")
-    dialog.setContentText("Interfaces: ")
-    val result = dialog.showAndWait()
-    if (result.isPresent) Some(result.get())
-    else None
-  }
-
+  /**
+    * Se le pide al usuario que elija la interfaz por la cual se escucharan
+    * y enviaran paquetes UDP. Si el usuario selecciono una opcion se crea
+    * el sistema de Actores, de lo contrario se muestra un error y se vuelve
+    * a llamar la funcion.
+    */
   def chooseInterfaceAndStartSystem(): Unit = {
     val interface = chooseInterfaceDialog()
     interface match {
@@ -63,6 +45,49 @@ class EditorController extends Initializable {
         alert.showAndWait()
         chooseInterfaceAndStartSystem()
     }
+
+    /**
+      * El usuario escoge una interfaz de la lista de opciones.
+      *
+      * @return Regresa la seleccion del usuario o None si no se selecciono nada.
+      */
+    def chooseInterfaceDialog(): Option[String] = {
+      //Obtener las interfaces del sistema operativo y agregarlas a una lista
+      val enum = NetworkInterface.getNetworkInterfaces
+      val choices = new util.ArrayList[String]()
+      while (enum.hasMoreElements) choices.add(enum.nextElement().getName)
+      //Crear un dialogo con las interfaces encontradas en el sistema operativo
+      val dialog = new ChoiceDialog[String]("Seleccione una opcion", choices)
+      dialog.setTitle("Seleccion de Interfaces")
+      dialog.setHeaderText("Favor de seleccionar la interfaz conectada a internet.")
+      dialog.setContentText("Interfaces: ")
+      //Esperar a que el usuario seleccione una opcion
+      val result = dialog.showAndWait()
+      if (result.isPresent) Some(result.get())
+      else None
+    }
+
+    /**
+      * Se crea el sistema de Actores y se crea el Actor supervisor.
+      *
+      * @param iface La interfaz de red usada para escuchar y enviar paquetes UDP
+      * @return El Actor supervisor creado.
+      */
+    def createActorSystem(iface: String): ActorRef = {
+      val system = ActorSystem("EditorSystem")
+      system.actorOf(
+        Props(
+          new Supervisor(
+            iface,
+            textArea,
+            listView,
+            FXCollections.observableArrayList[Host]()
+          )
+        ).withDispatcher("akka.javafx-dispatcher"),
+        name = "Supervisor"
+      )
+    }
+
   }
 
 
