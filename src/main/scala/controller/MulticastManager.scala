@@ -7,6 +7,7 @@ import java.nio.charset.Charset
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io.Inet.{DatagramChannelCreator, SocketOptionV2}
 import akka.io.{IO, Udp}
+import akka.util.ByteString
 import controller.MulticastManager.{ListenedData, ReadyToSend}
 
 
@@ -30,11 +31,13 @@ class MulticastManager(supervisor: ActorRef, iface: String) extends Actor {
 
   val opts = List(InetProtocolFamily(), MulticastGroup("239.1.2.3", iface))
 
+  val multicastSocket = new InetSocketAddress("239.1.2.3", 2249)
+
   IO(Udp) ! Udp.Bind(self, new InetSocketAddress(2249), opts)
 
   def receive = {
     case Udp.Bound(local) =>
-      println("Listener ready...")
+      println(s"Listener ready at ${local.getHostName}:${local.getPort}")
       context.become(ready(sender()))
   }
 
@@ -45,7 +48,9 @@ class MulticastManager(supervisor: ActorRef, iface: String) extends Actor {
       supervisor ! ListenedData(processed, remote)
     case Udp.Unbind  => socket ! Udp.Unbind
     case Udp.Unbound => context.stop(self)
-    case ReadyToSend(data) => socket ! data
+    case ReadyToSend(data) =>
+      println(s"About to send through the wire $data")
+    socket ! Udp.Send(ByteString.fromString(data), multicastSocket)
   }
 
 }

@@ -1,4 +1,6 @@
 package controller
 
 
-case class Host(address: String)
+case class Host(address: String) {
+  override def toString: String = address
+}

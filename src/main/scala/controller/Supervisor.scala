@@ -6,6 +6,8 @@ import javafx.scene.control.TextArea
 import akka.actor.{Actor, ActorRef}
 import com.jfoenix.controls.JFXListView
 
+import scala.collection.mutable
+
 /**
   * Created by osocron on 11/03/17.
   */
@@ -32,9 +34,21 @@ class Supervisor(interface: String, textArea: TextArea,
     case MulticastManager.FromEditor(_, newValue) =>
       listener ! MulticastManager.ReadyToSend(newValue)
     case MulticastManager.ListenedData(data, from) =>
-      textArea.setText(data)
-      hosts.add(Host(from.getHostName))
-      listView.setItems(hosts)
+      handleIncomingText(data)
+      handleIncomingHost(Host(from.getAddress.getHostAddress))
+  }
+
+  def handleIncomingText(text: String): Unit = {
+    textArea.setText(text)
+    textArea.positionCaret(text.length)
+  }
+
+  def handleIncomingHost(h: Host): Unit = {
+    val hostNameArray = mutable.MutableList[String]()
+    val iterator = hosts.iterator()
+    while (iterator.hasNext) hostNameArray += iterator.next().address
+    if (!hostNameArray.contains(h.address)) hosts.add(h)
+    listView.setItems(hosts)
   }
 
 }
