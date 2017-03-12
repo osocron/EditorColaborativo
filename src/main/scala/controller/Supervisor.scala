@@ -46,8 +46,9 @@ class Supervisor(interface: String,
   def handleIncomingText(text: String): Unit = {
     if (text != textArea.getText) {
       textArea.textProperty().removeListener(textListener)
+      val pos = textArea.getCaretPosition
       textArea.setText(text)
-      textArea.positionCaret(text.length)
+      textArea.positionCaret(pos)
       textArea.textProperty().addListener(textListener)
     }
   }
