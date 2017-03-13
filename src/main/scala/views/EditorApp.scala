@@ -8,6 +8,9 @@ import javafx.stage.Stage
 import scalafx.Includes._
 import scalafx.scene.Scene
 
+/**
+  * Inicializacion de la interfaz grafica de usuario
+  */
 class EditorApp extends Application {
   override def start(primaryStage: Stage): Unit = {
     primaryStage.setTitle("Editor Colaborativo")

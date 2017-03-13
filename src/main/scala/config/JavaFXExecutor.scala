@@ -6,7 +6,10 @@ import java.util.concurrent.{ExecutorService, AbstractExecutorService, ThreadFac
 import java.util.Collections
 import javafx.application.Platform
 
-
+/**
+  * Configuracion necesaria para ejecutar codigo concurrente
+  * en los hilos GUI de JavaFX
+  */
 object JavaFXExecutorService extends AbstractExecutorService {
   override def shutdown(): Unit = ()
   override def isTerminated: Boolean = false
@@ -22,7 +25,6 @@ class JavaFXEventThreadExecutorServiceConfigurator(config: Config,
   private val f = new ExecutorServiceFactory {
     def createExecutorService: ExecutorService = JavaFXExecutorService
   }
-
   def createExecutorServiceFactory(id: String, threadFactory: ThreadFactory): ExecutorServiceFactory = f
 }
 
