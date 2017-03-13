@@ -1,4 +1,4 @@
-package controller
+package actors
 
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
@@ -22,7 +22,7 @@ class Supervisor(interface: String,
   case class ManagerReady(a: ActorRef)
 
   override def preStart(): Unit = {
-    println("Warming up Akka...")
+    println("Warming up Akka System...")
     val managerProps = MulticastManager.props(self, interface)
     val manager: ActorRef = context.actorOf(managerProps)
     textArea.textProperty().addListener(textListener)

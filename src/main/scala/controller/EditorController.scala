@@ -7,6 +7,7 @@ import javafx.collections.FXCollections
 import javafx.fxml.{FXML, Initializable}
 import javafx.scene.control.{ChoiceDialog, TextArea}
 
+import actors.{Host, Supervisor}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import com.jfoenix.controls.JFXListView
 
@@ -27,6 +28,27 @@ class EditorController extends Initializable {
     chooseInterfaceAndStartSystem()
   }
 
+    /**
+      * El usuario escoge una interfaz de la lista de opciones.
+      *
+      * @return Regresa la seleccion del usuario o None si no se selecciono nada.
+      */
+    def chooseInterfaceDialog(): Option[String] = {
+        //Obtener las interfaces del sistema operativo y agregarlas a una lista
+        val enum = NetworkInterface.getNetworkInterfaces
+        val choices = new util.ArrayList[String]()
+        while (enum.hasMoreElements) choices.add(enum.nextElement().getName)
+        //Crear un dialogo con las interfaces encontradas en el sistema operativo
+        val dialog = new ChoiceDialog[String]("Seleccione una opcion", choices)
+        dialog.setTitle("Seleccion de Interfaces")
+        dialog.setHeaderText("Favor de seleccionar la interfaz conectada a internet.")
+        dialog.setContentText("Interfaces: ")
+        //Esperar a que el usuario seleccione una opcion
+        val result = dialog.showAndWait()
+        if (result.isPresent) Some(result.get())
+        else None
+      }
+
   /**
     * Se le pide al usuario que elija la interfaz por la cual se escucharan
     * y enviaran paquetes UDP. Si el usuario selecciono una opcion se crea
@@ -44,27 +66,6 @@ class EditorController extends Initializable {
         alert.setContentText("Es necesario seleccionar una opcion!")
         alert.showAndWait()
         chooseInterfaceAndStartSystem()
-    }
-
-    /**
-      * El usuario escoge una interfaz de la lista de opciones.
-      *
-      * @return Regresa la seleccion del usuario o None si no se selecciono nada.
-      */
-    def chooseInterfaceDialog(): Option[String] = {
-      //Obtener las interfaces del sistema operativo y agregarlas a una lista
-      val enum = NetworkInterface.getNetworkInterfaces
-      val choices = new util.ArrayList[String]()
-      while (enum.hasMoreElements) choices.add(enum.nextElement().getName)
-      //Crear un dialogo con las interfaces encontradas en el sistema operativo
-      val dialog = new ChoiceDialog[String]("Seleccione una opcion", choices)
-      dialog.setTitle("Seleccion de Interfaces")
-      dialog.setHeaderText("Favor de seleccionar la interfaz conectada a internet.")
-      dialog.setContentText("Interfaces: ")
-      //Esperar a que el usuario seleccione una opcion
-      val result = dialog.showAndWait()
-      if (result.isPresent) Some(result.get())
-      else None
     }
 
     /**

@@ -1,4 +1,4 @@
-package util
+package config
 
 import akka.dispatch.{DispatcherPrerequisites, ExecutorServiceFactory, ExecutorServiceConfigurator}
 import com.typesafe.config.Config
