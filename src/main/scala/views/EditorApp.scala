@@ -20,6 +20,7 @@ class EditorApp extends Application {
     val root: Parent = loader.load()
     val controller = loader.getController[EditorController]
     controller.registerCloseEvent(primaryStage)
+    controller.handleHelpOption(getHostServices)
     primaryStage.setScene(new Scene(root, 700, 500))
     primaryStage.show()
   }

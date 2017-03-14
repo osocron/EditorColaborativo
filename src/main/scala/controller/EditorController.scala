@@ -1,22 +1,23 @@
 package controller
 
+import java.io.{BufferedWriter, FileWriter}
 import java.net.{NetworkInterface, URL}
 import java.util
 import java.util.ResourceBundle
 import javafx.collections.FXCollections
-import javafx.event.{ActionEvent, EventHandler}
+import javafx.event.ActionEvent
 import javafx.fxml.{FXML, Initializable}
-import javafx.scene.control.{ChoiceDialog, MenuItem, TextArea}
+import javafx.scene.control.Alert.AlertType
+import javafx.scene.control._
+import javafx.scene.layout.FlowPane
 import javafx.stage.{Stage, WindowEvent}
 
 import actors.{Host, Supervisor}
-import akka.actor.{ActorRef, ActorSystem, PoisonPill, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import com.jfoenix.controls.JFXListView
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import scalafx.scene.control.Alert
-import scalafx.scene.control.Alert.AlertType
+import scalafx.application.HostServices
+import scalafx.stage.FileChooser
 
 
 class EditorController extends Initializable {
@@ -28,6 +29,10 @@ class EditorController extends Initializable {
   var listView: JFXListView[Host] = _
   @FXML
   var cerrarMenuItem: MenuItem = _
+  @FXML
+  var menuItemSave: MenuItem = _
+  @FXML
+  var menuItemHelp: MenuItem = _
 
   lazy val system = ActorSystem("EditorSystem")
   lazy val supervisor = chooseInterfaceAndStartSystem()
@@ -36,6 +41,7 @@ class EditorController extends Initializable {
   override def initialize(location: URL, resources: ResourceBundle): Unit = {
     println("Controller Intizialized")
     handleCloseMenuEvent(supervisor)
+    handleSaveFile()
   }
 
   /**
@@ -70,7 +76,7 @@ class EditorController extends Initializable {
     interface match {
       case Some(iface) => createSupervisor(iface)
       case None =>
-        val alert = new Alert(AlertType.Error)
+        val alert = new Alert(AlertType.ERROR)
         alert.setTitle("Error")
         alert.setHeaderText(null)
         alert.setContentText("Es necesario seleccionar una opcion!")
@@ -121,6 +127,55 @@ class EditorController extends Initializable {
   def registerCloseEvent(primaryStage: Stage) = {
     primaryStage.setOnCloseRequest((event: WindowEvent) => {
       event.consume()
+    })
+  }
+
+  /**
+    * Guarda el contenido del TextArea en un archivo
+    */
+  def handleSaveFile(): Unit = {
+    menuItemSave.setOnAction((_: ActionEvent) => {
+      val fileChooser = new FileChooser {
+        title = "Guardar el archivo"
+      }
+      val file = fileChooser.showSaveDialog(textArea.getScene.getWindow)
+      if (file != null) {
+        try {
+          val writer = new BufferedWriter(new FileWriter(file))
+          writer.write(textArea.getText)
+          writer.close()
+        } catch  {
+          case e: Exception =>
+            val alert = new Alert(AlertType.ERROR)
+            alert.setTitle("Error")
+            alert.setHeaderText("Error al guardar el archivo")
+            alert.setContentText(e.getMessage)
+            alert.showAndWait()
+        }
+      }
+    })
+  }
+
+  /**
+    * Muestra una liga al codigo fuente del proyecto
+    *
+    * @param hostServices Se nececita para abrir el navegador
+    */
+  def handleHelpOption(hostServices: HostServices): Unit = {
+    menuItemHelp.setOnAction((_: ActionEvent) => {
+      val alert = new Alert(AlertType.INFORMATION)
+      alert.setTitle("Editor Colaborativo")
+      alert.setHeaderText("Editor Colaborativo v0.1")
+      val fp = new FlowPane()
+      val lbl = new Label("Codigo fuente disponible en ")
+      val link = new Hyperlink("github.")
+      fp.getChildren.addAll(lbl, link)
+      link.setOnAction((_:ActionEvent) => {
+        alert.close()
+        hostServices.showDocument("https://github.com/osocron/EditorColaborativo")
+      })
+      alert.getDialogPane.contentProperty().set(fp)
+      alert.showAndWait()
     })
   }
 
