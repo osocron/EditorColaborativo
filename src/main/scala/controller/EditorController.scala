@@ -22,7 +22,6 @@ import scalafx.stage.FileChooser
 
 class EditorController extends Initializable {
 
-
   @FXML
   var textArea: TextArea = _
   @FXML
@@ -98,7 +97,8 @@ class EditorController extends Initializable {
           iface,
           textArea,
           listView,
-          FXCollections.observableArrayList[Host]()
+          FXCollections.observableArrayList[Host](),
+          this
         )
       ).withDispatcher("akka.javafx-dispatcher"),
       name = "Supervisor"
@@ -177,6 +177,22 @@ class EditorController extends Initializable {
       alert.getDialogPane.contentProperty().set(fp)
       alert.showAndWait()
     })
+  }
+
+  /**
+    * Si no se puede crear el Socket se le pide al usuario que
+    * intente con otra interfaz.
+    *
+    * @return La referencia al actor supervisor
+    */
+  def socketNotBoundAction(): ActorRef = {
+    val alert = new Alert(AlertType.INFORMATION)
+    alert.setTitle("Error")
+    alert.setHeaderText("Error al crear el canal de comunicacion")
+    alert.setContentText("Probablmente la interfaz no es la correcta " +
+      "o existen dos instancias del programa en ejecucion.")
+    alert.showAndWait()
+    chooseInterfaceAndStartSystem()
   }
 
 }

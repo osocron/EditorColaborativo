@@ -4,10 +4,11 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.scene.control.TextArea
 
-import actors.Supervisor.{StopConnection, TerminateSystem}
-import akka.actor.{Actor, ActorRef, PoisonPill}
+import actors.Supervisor.{SocketNotBound, StopConnection, TerminateSystem}
+import akka.actor.{Actor, ActorRef}
 import akka.io.Udp
 import com.jfoenix.controls.JFXListView
+import controller.EditorController
 
 import scala.collection.mutable
 
@@ -23,7 +24,8 @@ import scala.collection.mutable
 class Supervisor(interface: String,
                  textArea: TextArea,
                  listView: JFXListView[Host],
-                 hosts: ObservableList[Host]) extends Actor {
+                 hosts: ObservableList[Host],
+                 controller: EditorController) extends Actor {
 
   import MulticastManager._
 
@@ -57,6 +59,8 @@ class Supervisor(interface: String,
     case ListenedData(data, from) =>
       handleIncomingText(data)
       handleIncomingHost(Host(from.getAddress.getHostAddress))
+    //Hubo un error al abrir el socket
+    case SocketNotBound => controller.socketNotBoundAction()
     //Cerrar el sistema de actores
     case StopConnection => listener ! Udp.Unbind
     case TerminateSystem => context.system.terminate()
@@ -108,4 +112,5 @@ class Supervisor(interface: String,
 object Supervisor {
   case object StopConnection
   case object TerminateSystem
+  case object SocketNotBound
 }

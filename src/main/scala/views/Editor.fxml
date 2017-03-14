@@ -67,7 +67,7 @@
             <Insets bottom="15.0" left="15.0" top="15.0" />
          </BorderPane.margin>
          <children>
-            <Label text="Nombre del archivo">
+            <Label>
                <VBox.margin>
                   <Insets bottom="5.0" />
                </VBox.margin>

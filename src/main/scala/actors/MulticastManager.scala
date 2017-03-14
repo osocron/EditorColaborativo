@@ -34,6 +34,8 @@ class MulticastManager(supervisor: ActorRef,
     case Udp.Bound(local) =>
       println(s"Listener ready at ${local.getHostName}:${local.getPort}")
       context.become(ready(sender()))
+    //Could not bind the address
+    case Udp.CommandFailed(_) => supervisor ! Supervisor.SocketNotBound
   }
 
   def ready(socket: ActorRef): Receive = {
