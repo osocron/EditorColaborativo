@@ -4,7 +4,7 @@ import java.net._
 import java.nio.charset.Charset
 
 import actors.MulticastManager._
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, PoisonPill, Props}
 import akka.io.{IO, Udp}
 import akka.util.ByteString
 
@@ -45,7 +45,9 @@ class MulticastManager(supervisor: ActorRef,
       supervisor ! ListenedData(processed, remote)
     // Si se requiere que se detenga el enlace al socket
     case Udp.Unbind  => socket ! Udp.Unbind
-    case Udp.Unbound => context.stop(self)
+    case Udp.Unbound =>
+      supervisor ! Supervisor.TerminateSystem
+      context.stop(self)
     //Si se recive un mensaje con datos del editor se envian por la red
     //por medio del socket multicast.
     case ReadyToSend(data) =>

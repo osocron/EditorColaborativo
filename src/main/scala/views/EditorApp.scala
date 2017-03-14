@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.stage.Stage
 
+import controller.EditorController
+
 import scalafx.Includes._
 import scalafx.scene.Scene
 
@@ -14,7 +16,10 @@ import scalafx.scene.Scene
 class EditorApp extends Application {
   override def start(primaryStage: Stage): Unit = {
     primaryStage.setTitle("Editor Colaborativo")
-    val root: Parent = FXMLLoader.load(getClass.getResource("Editor.fxml"))
+    val loader = new FXMLLoader(getClass.getResource("Editor.fxml"))
+    val root: Parent = loader.load()
+    val controller = loader.getController[EditorController]
+    controller.registerCloseEvent(primaryStage)
     primaryStage.setScene(new Scene(root, 700, 500))
     primaryStage.show()
   }

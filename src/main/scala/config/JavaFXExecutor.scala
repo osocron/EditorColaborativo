@@ -11,7 +11,7 @@ import javafx.application.Platform
   * en los hilos GUI de JavaFX
   */
 object JavaFXExecutorService extends AbstractExecutorService {
-  override def shutdown(): Unit = ()
+  override def shutdown(): Unit = Platform.exit()
   override def isTerminated: Boolean = false
   override def awaitTermination(timeout: Long, unit: TimeUnit): Boolean = true
   override def shutdownNow(): java.util.List[Runnable] = Collections.emptyList[Runnable]

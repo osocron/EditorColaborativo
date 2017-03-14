@@ -4,7 +4,9 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.scene.control.TextArea
 
-import akka.actor.{Actor, ActorRef}
+import actors.Supervisor.{StopConnection, TerminateSystem}
+import akka.actor.{Actor, ActorRef, PoisonPill}
+import akka.io.Udp
 import com.jfoenix.controls.JFXListView
 
 import scala.collection.mutable
@@ -55,6 +57,9 @@ class Supervisor(interface: String,
     case ListenedData(data, from) =>
       handleIncomingText(data)
       handleIncomingHost(Host(from.getAddress.getHostAddress))
+    //Cerrar el sistema de actores
+    case StopConnection => listener ! Udp.Unbind
+    case TerminateSystem => context.system.terminate()
   }
 
   /**
@@ -98,4 +103,9 @@ class Supervisor(interface: String,
     }
   }
 
+}
+
+object Supervisor {
+  case object StopConnection
+  case object TerminateSystem
 }
